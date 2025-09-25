@@ -1,43 +1,117 @@
 ```mermaid
+%%{init: {'theme': 'base', 'themeVariables': { 'fontSize': '16px', 'fontWeight': 'bold', 'textColor': '#000000' }}}%%
 flowchart TD
-    A[Setup & Installation] --> B[Dataset Creation]
-    
-    B --> B1[Waste Management Dataset]
-    B --> B2[Healthcare Dataset]
-    B --> B3[Air Quality Dataset]
-    B1 --> CSV1[(CSV)]
-    B2 --> CSV2[(CSV)]
-    B3 --> CSV3[(CSV)]
+    subgraph DataSources[Data Sources]
+        NASA[<strong>NASA Earth Data</strong>]
+        City[<strong>City Data</strong>]
+        Sensors[<strong>Environmental Sensors</strong>]
+    end
 
-    B --> C[Exploratory Data Analysis]
-    C --> C1[Waste Analysis]
-    C --> C2[Healthcare Analysis]
-    C --> C3[Air Quality Analysis]
-    C1 & C2 & C3 --> D[Data Correlations]
+    subgraph DataGen[Data Generation & Processing]
+        WM[<strong>Waste Management Generator</strong>]
+        HC[<strong>Healthcare Access Generator</strong>]
+        AQ[<strong>Air Quality Generator</strong>]
+        
+        NASA --> WM
+        NASA --> HC
+        NASA --> AQ
+        City --> WM
+        City --> HC
+        Sensors --> AQ
+    end
 
-    D --> E[ML Models]
-    E --> E1[Dump Detection - RF]
-    E --> E2[Facility Placement - GB]
-    E --> E3[Healthcare Priority - NN]
-    E --> E4[Air Quality - XGB]
-    E --> E5[Urban Zones - DBSCAN]
-    
-    E1 & E2 & E3 & E4 & E5 --> F[Model Deployment]
-    
-    F --> G[CityWISE Predictor]
-    G --> H[Flask API]
-    
-    H --> API1(Waste API)
-    H --> API2(Healthcare API)
-    H --> API3(Air Quality API)
-    H --> API4(Urban Analysis API)
+    subgraph Storage[Data Storage]
+        WMD[(<strong>waste_management.csv</strong>)]
+        HCD[(<strong>healthcare_access.csv</strong>)]
+        AQD[(<strong>air_quality.csv</strong>)]
+        
+        WM --> WMD
+        HC --> HCD
+        AQ --> AQD
+    end
 
-    classDef default fill:#f9f,stroke:#333,stroke-width:1px
-    classDef data fill:#e1f5fe,stroke:#01579b,stroke-width:1px
-    classDef model fill:#e8f5e9,stroke:#1b5e20,stroke-width:1px
-    classDef api fill:#fff3e0,stroke:#e65100,stroke-width:1px
+    subgraph PreProcess[Data Preprocessing]
+        Scale[<strong>StandardScaler</strong>]
+        Split[<strong>Train-Test Split</strong>]
+        Clean[<strong>Data Cleaning</strong>]
+        
+        WMD & HCD & AQD --> Clean
+        Clean --> Scale
+        Scale --> Split
+    end
 
-    class B1,B2,B3,CSV1,CSV2,CSV3 data
-    class E1,E2,E3,E4,E5 model
-    class API1,API2,API3,API4 api
+    subgraph Models[Machine Learning Models]
+        direction TB
+        RF[<strong>Random Forest</strong>]
+        GB[<strong>Gradient Boosting</strong>]
+        NN[<strong>Neural Network</strong>]
+        XGB[<strong>XGBoost</strong>]
+        DB[<strong>DBSCAN</strong>]
+        
+        Split --> RF & GB & NN & XGB & DB
+    end
+
+    subgraph Artifacts[Model Artifacts]
+        PKL1[(<strong>illegal_dump_detector.pkl</strong>)]
+        PKL2[(<strong>facility_optimizer.pkl</strong>)]
+        H5[(<strong>healthcare_priority.h5</strong>)]
+        PKL3[(<strong>air_quality.pkl</strong>)]
+        PKL4[(<strong>urban_zones.pkl</strong>)]
+        
+        RF --> PKL1
+        GB --> PKL2
+        NN --> H5
+        XGB --> PKL3
+        DB --> PKL4
+    end
+
+    subgraph Predictor[CityWISE Predictor]
+        Load[<strong>Model Loader</strong>]
+        Analyze[<strong>Analysis Engine</strong>]
+        
+        PKL1 & PKL2 & H5 & PKL3 & PKL4 --> Load
+        Load --> Analyze
+    end
+
+    subgraph API[Flask REST API]
+        Routes[<strong>API Routes</strong>]
+        Auth[<strong>Authentication</strong>]
+        Valid[<strong>Validation</strong>]
+        
+        Analyze --> Valid
+        Valid --> Routes
+        Auth --> Routes
+    end
+
+    subgraph Endpoints[API Endpoints]
+        W[(<strong>/analyze/waste</strong>)]
+        H[(<strong>/analyze/healthcare</strong>)]
+        A[(<strong>/analyze/air-quality</strong>)]
+        U[(<strong>/analyze/comprehensive</strong>)]
+        
+        Routes --> W & H & A & U
+    end
+
+    classDef source fill:#e1f5fe,stroke:#01579b,stroke-width:2px,color:#000000
+    classDef storage fill:#fff3e0,stroke:#ff6f00,stroke-width:2px,color:#000000
+    classDef process fill:#e8f5e9,stroke:#1b5e20,stroke-width:2px,color:#000000
+    classDef model fill:#f3e5f5,stroke:#4a148c,stroke-width:2px,color:#000000
+    classDef api fill:#fce4ec,stroke:#880e4f,stroke-width:2px,color:#000000
+
+    class NASA,City,Sensors source
+    class WMD,HCD,AQD,PKL1,PKL2,H5,PKL3,PKL4 storage
+    class WM,HC,AQ,Scale,Split,Clean,Load,Analyze,Valid process
+    class RF,GB,NN,XGB,DB model
+    class Routes,W,H,A,U api
+
+    %% Styling subgraphs
+    style DataSources fill:#e1f5fe,stroke:#01579b,stroke-width:4px
+    style DataGen fill:#e8f5e9,stroke:#1b5e20,stroke-width:4px
+    style Storage fill:#fff3e0,stroke:#ff6f00,stroke-width:4px
+    style PreProcess fill:#e8f5e9,stroke:#1b5e20,stroke-width:4px
+    style Models fill:#f3e5f5,stroke:#4a148c,stroke-width:4px
+    style Artifacts fill:#fff3e0,stroke:#ff6f00,stroke-width:4px
+    style Predictor fill:#e8f5e9,stroke:#1b5e20,stroke-width:4px
+    style API fill:#fce4ec,stroke:#880e4f,stroke-width:4px
+    style Endpoints fill:#fce4ec,stroke:#880e4f,stroke-width:4px
 ```
